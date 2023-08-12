@@ -25,32 +25,35 @@ public class StudentController {
     HashMap<String,String>studentTeacherDb=new HashMap<>();
     @PostMapping("/add-student")
     public ResponseEntity<String> addStudent(@RequestBody Student student){
+        if(student!=null)
          studentDb.put(student.getName(),student);
         return new ResponseEntity<>("New student added successfully", HttpStatus.CREATED);
     }
 
     @PostMapping("/add-teacher")
     public ResponseEntity<String> addTeacher(@RequestBody Teacher teacher){
+        if(teacher!=null)
          teacherDb.put(teacher.getName(), teacher);
         return new ResponseEntity<>("New teacher added successfully", HttpStatus.CREATED);
     }
 
     @PutMapping("/add-student-teacher-pair")
     public ResponseEntity<String> addStudentTeacherPair(@RequestParam String student, @RequestParam String teacher){
-       studentTeacherDb.put(teacher, student);
+        if(student!=null && teacher!=null)
+        studentTeacherDb.put(teacher, student);
         return new ResponseEntity<>("New student-teacher pair added successfully", HttpStatus.CREATED);
     }
 
     @GetMapping("/get-student-by-name/{name}")
     public ResponseEntity<Student> getStudentByName(@PathVariable String name){
-        Student student = studentDb.get(name); // Assign student by calling service layer method
+        Student student = studentDb.getOrDefault(name, null); // Assign student by calling service layer method
 
         return new ResponseEntity<>(student, HttpStatus.CREATED);
     }
 
     @GetMapping("/get-teacher-by-name/{name}")
     public ResponseEntity<Teacher> getTeacherByName(@PathVariable String name){
-        Teacher teacher = teacherDb.get(name); // Assign student by calling service layer method
+        Teacher teacher = teacherDb.getOrDefault(name, null); // Assign student by calling service layer method
 
         return new ResponseEntity<>(teacher, HttpStatus.CREATED);
     }
