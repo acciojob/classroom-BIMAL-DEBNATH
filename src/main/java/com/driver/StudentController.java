@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class StudentController {
    HashMap<String,Student>studentDb=new HashMap<>();
     HashMap<String,Teacher>teacherDb=new HashMap<>();
-    HashMap<String,String>studentTeacherDb=new HashMap<>();
+    HashMap<String,List<String>>studentTeacherDb=new HashMap<>();
     @PostMapping("/add-student")
     public ResponseEntity<String> addStudent(@RequestBody Student student){
         if(student!=null)
@@ -39,8 +39,18 @@ public class StudentController {
 
     @PutMapping("/add-student-teacher-pair")
     public ResponseEntity<String> addStudentTeacherPair(@RequestParam String student, @RequestParam String teacher){
-        if(student!=null && teacher!=null)
-        studentTeacherDb.put(teacher, student);
+
+        if(studentTeacherDb.containsKey(teacher)){
+            List<String>studentTeacher=studentTeacherDb.get(teacher);
+            studentTeacher.add(student);
+            studentTeacherDb.put(teacher,studentTeacher);
+        }else{
+            List<String>studentTeacherN=new ArrayList<>();
+            studentTeacherN.add(student);
+            studentTeacherDb.put(teacher,studentTeacherN);
+        }
+
+
         return new ResponseEntity<>("New student-teacher pair added successfully", HttpStatus.CREATED);
     }
 
@@ -64,7 +74,7 @@ public class StudentController {
 
         for(String teachers:studentTeacherDb.keySet()){
             if(teachers.equals(teacher)){
-                students.add(studentTeacherDb.get(teachers));
+                students=studentTeacherDb.get(teachers);
             }
         }
 
@@ -89,14 +99,34 @@ public class StudentController {
             teacherDb.remove(teacher);
         }
         if(studentTeacherDb.containsKey(teacher)){
+                for(String stu:studentTeacherDb.get(teacher)){
+                    if(studentDb.containsKey(stu)) {
+                        studentDb.remove(stu);
+                    }
+                }
             studentTeacherDb.remove(teacher);
         }
         return new ResponseEntity<>(teacher + " removed successfully", HttpStatus.CREATED);
     }
+
     @DeleteMapping("/delete-all-teachers")
     public ResponseEntity<String> deleteAllTeachers(){
+
+
+        List<String>listStudent=new ArrayList<>();
+
+        for(String tr:studentTeacherDb.keySet()){
+
+            for(String st:studentTeacherDb.get(tr)){
+                if(studentDb.containsKey(st)){
+                    studentDb.remove(st);
+                }
+            }
+        }
         teacherDb.clear();
         studentTeacherDb.clear();
+
+
         return new ResponseEntity<>("All teachers deleted successfully", HttpStatus.CREATED);
     }
 }
